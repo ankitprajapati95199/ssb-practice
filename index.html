@@ -1,92 +1,183 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SSB Practice</title>
+
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5ef;--card:#fff;--tx:#1d2418;--mu:#667060;--ac:#3d5a2a;--ac2:#e8eedf;--bd:#d9dccf;--warn:#b3261e}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151a12;--card:#1e251a;--tx:#eef1e8;--mu:#9aa592;--ac:#8fbf6a;--ac2:#2a3424;--bd:#333d2c;--warn:#ff8a80}}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
-.w{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:22px;margin:4px 0 2px}
-.sub{color:var(--mu);font-size:14px;margin:0 0 14px}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.tabs button{padding:10px 2px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font-weight:600;font-size:14px;cursor:pointer}
-.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:12px}
-.info{font-size:14px;color:var(--mu);margin:0 0 12px}
-.stage{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
-.ph{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ac);font-weight:700}
-.tm{font-size:56px;font-weight:700;font-variant-numeric:tabular-nums}
-.tm.low{color:var(--warn)}
-.big{font-size:38px;font-weight:700}
-.pic{width:100%;max-height:300px;object-fit:contain;border-radius:10px;border:1px solid var(--bd)}
-.ph-box{width:100%;padding:44px 12px;border:2px dashed var(--bd);border-radius:10px;color:var(--mu);font-size:14px}
-.tp{list-style:none;padding:0;margin:0;width:100%}
-.tp li{padding:10px 12px;margin:6px 0;background:var(--ac2);border-radius:8px;text-align:left}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.b{flex:1;padding:12px;border-radius:10px;border:1px solid var(--ac);background:var(--ac);color:#fff;font-weight:600;font-size:15px;cursor:pointer}
-.b.s{background:transparent;color:var(--ac)}
-.bar{height:6px;background:var(--ac2);border-radius:4px;overflow:hidden;margin-bottom:10px}
-.bar i{display:block;height:100%;background:var(--ac);width:0;transition:width .3s}
-label.up{display:block;font-size:14px;margin-top:10px;color:var(--mu)}
-input[type=file]{margin-top:6px;max-width:100%}
+  body { font-family: Arial, sans-serif; background: #f2f4ee; text-align: center; margin: 0; padding: 15px; }
+  h1 { color: #3d5a2a; }
+  button { padding: 10px 14px; margin: 4px; font-size: 16px; border: none; border-radius: 8px; background: #3d5a2a; color: white; }
+  #box { background: white; border-radius: 12px; padding: 20px; margin: 15px auto; max-width: 500px; min-height: 220px; }
+  #title { color: #3d5a2a; font-weight: bold; }
+  #content { font-size: 32px; margin: 15px 0; }
+  #timer { font-size: 50px; font-weight: bold; }
+  img { max-width: 100%; max-height: 250px; }
 </style>
 </head>
+
 <body>
-<div class="w">
-<h1>SSB Practice Room</h1>
-<p class="sub">Timed practice for PPDT, TAT, WAT and Lecturette.</p>
-<div class="tabs" id="tabs"></div>
-<div class="card"><p class="info" id="info"></p><div class="bar"><i id="pg"></i></div>
-<div class="stage" id="stage"></div></div>
-<div class="row"><button class="b" id="go">Start</button><button class="b s" id="skip">Skip</button><button class="b s" id="rst">Reset</button></div>
-<div class="card" id="upc" style="margin-top:12px"><b>Your pictures (PPDT / TAT)</b>
-<label class="up">Optional: try your own images from this device (replaces the folder pictures for this session)<input type="file" id="up" accept="image/*" multiple></label></div>
-</div>
+  <h1>SSB Practice</h1>
+
+  <!-- Test buttons -->
+  <button onclick="startTest('ppdt')">PPDT</button>
+  <button onclick="startTest('tat')">TAT</button>
+  <button onclick="startTest('wat')">WAT</button>
+  <button onclick="startTest('lecturette')">Lecturette</button>
+
+  <!-- Where everything is shown -->
+  <div id="box">
+    <div id="title">Choose a test</div>
+    <div id="content"></div>
+    <div id="timer"></div>
+  </div>
+
+  <!-- Control buttons -->
+  <button onclick="pauseOrResume()">Pause / Resume</button>
+  <button onclick="nextStep()">Skip</button>
+
 <script>
-const WORDS="Mother,Duty,Fear,Failure,Army,Win,Friend,Leader,Courage,Team,Defeat,Money,Danger,Sacrifice,Discipline,Father,Brave,Enemy,Help,Hope,Pressure,Honest,Group,Lazy,Order,Risk,Anger,Success,Weak,Strong,Dream,Nation,Fight,Trust,Cheat,Patience,Effort,War,Love,Ambition,Responsibility,Sports,Crisis,Fail,Lead,Care,Cry,Alone,Quarrel,Tired,Hard,Sorrow,Selfish,Rules,Wound,Decision,Future,Peace,Worry,Respect".split(",");
-const TOPICS=["Cyber security and India","Role of NCC in nation building","Climate change","Women in the armed forces","Make in India and defence","Unemployment among youth","Importance of discipline","India’s space programme","Social media: boon or bane","Border management","Disaster management","Digital India","Water scarcity","Role of the Indian Navy","Terrorism and its impact","Sports and character building","Renewable energy","Corruption in society","Drone warfare","Leadership qualities"];
-const MODES={
-ppdt:{n:"PPDT",info:"30 seconds to view a picture, then 4 minutes to write a story. Note the characters, mood, past, present and a positive outcome."},
-tat:{n:"TAT",info:"12 slides (the last is blank). 30 seconds to view each, 4 minutes to write each story."},
-wat:{n:"WAT",info:"60 words, 15 seconds each. Write the first positive sentence that comes to mind."},
-lec:{n:"Lecturette",info:"Pick one of 4 topics. 3 minutes to prepare, then 3 minutes to speak."}};
-// Put your pictures in the images/ folder, named pic1.jpg ... pic12.jpg (or edit this list)
-const PICS=Array.from({length:12},(_,k)=>"images/pic"+(k+1)+".jpg");
-let mode="ppdt",seq=[],i=0,left=0,t=null,imgs=PICS.slice(),ctx=null;
-const $=id=>document.getElementById(id);
-const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
-function beep(n){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();for(let k=0;k<n;k++){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.15;o.start(ctx.currentTime+k*.3);o.stop(ctx.currentTime+k*.3+.18)}}catch(e){}}
-function pic(k,blank){if(blank)return'<div class="ph-box">Blank slide: imagine your own situation and write about it.</div>';
-return imgs[k]?'<img class="pic" src="'+imgs[k]+'" alt="Practice picture" onerror="this.outerHTML=\'<div class=ph-box>Add '+this.getAttribute('src')+' to the images folder</div>\'">':'<div class="ph-box">Picture '+(k+1)+' goes here. Add your own images below.</div>'}
-function build(){
- seq=[];
- if(mode=="ppdt"){const k=imgs.length?Math.floor(Math.random()*imgs.length):0;
-  seq=[{p:"Observe picture",s:30,h:pic(k)},{p:"Write your story",s:240,h:'<div class="big">Write now</div><div class="info">Hero, mood, past, present, future.</div>'}]}
- if(mode=="tat"){for(let k=0;k<12;k++){seq.push({p:"Slide "+(k+1)+" of 12 · View",s:30,h:pic(k,k==11)},{p:"Slide "+(k+1)+" of 12 · Write",s:240,h:'<div class="big">Write story '+(k+1)+'</div>'})}}
- if(mode=="wat"){shuf(WORDS).forEach((w,k)=>seq.push({p:"Word "+(k+1)+" of 60",s:15,h:'<div class="big" style="font-size:46px">'+w+'</div>'}))}
- if(mode=="lec"){const t4=shuf(TOPICS).slice(0,4);const l='<ul class="tp">'+t4.map((x,k)=>'<li>'+(k+1)+'. '+x+'</li>').join('')+'</ul>';
-  seq=[{p:"Prepare (choose 1 topic)",s:180,h:l},{p:"Speak now",s:180,h:'<div class="big">Deliver your lecturette</div><div class="info">Aim to finish before time. Open, body, conclusion.</div>'}]}
- i=0;load(false)}
-function load(run){clearInterval(t);t=null;const s=seq[i];if(!s){done();return}
- left=s.s;$("stage").innerHTML='<div class="ph">'+s.p+'</div>'+s.h+'<div class="tm" id="tm"></div>';
- draw();$("pg").style.width=(i/seq.length*100)+"%";
- if(run)start();else $("go").textContent="Start"}
-function draw(){const m=Math.floor(left/60),s=left%60,e=$("tm");if(e){e.textContent=m+":"+String(s).padStart(2,"0");e.classList.toggle("low",left<=10)}}
-function start(){clearInterval(t);$("go").textContent="Pause";t=setInterval(()=>{left--;draw();if(left<=0){clearInterval(t);t=null;beep(2);i++;load(true)}},1000)}
-function done(){$("pg").style.width="100%";$("stage").innerHTML='<div class="big">Time up!</div><div class="info">Session complete. Press Reset to practice again.</div>';$("go").textContent="Start"}
-$("go").onclick=()=>{if(!seq[i]){build();start();return}if(t){clearInterval(t);t=null;$("go").textContent="Resume"}else{beep(1);start()}};
-$("skip").onclick=()=>{if(i<seq.length){i++;load(!!t)}};
-$("rst").onclick=build;
-$("up").onchange=e=>{imgs=[...e.target.files].map(f=>URL.createObjectURL(f));build()};
-function setMode(m){mode=m;$("info").textContent=MODES[m].info;$("upc").style.display=(m=="ppdt"||m=="tat")?"block":"none";
- document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.m==m));build()}
-Object.keys(MODES).forEach(k=>{const b=document.createElement("button");b.textContent=MODES[k].n;b.dataset.m=k;b.onclick=()=>setMode(k);$("tabs").appendChild(b)});
-setMode("ppdt");
+  // ---------- 1. YOUR DATA (edit freely) ----------
+
+  var words = ["Mother", "Duty", "Fear", "Failure", "Army", "Win", "Friend", "Leader",
+    "Courage", "Team", "Defeat", "Money", "Danger", "Sacrifice", "Discipline", "Father",
+    "Brave", "Enemy", "Help", "Hope", "Pressure", "Honest", "Group", "Lazy", "Order",
+    "Risk", "Anger", "Success", "Weak", "Strong", "Dream", "Nation", "Fight", "Trust",
+    "Cheat", "Patience", "Effort", "War", "Love", "Ambition", "Responsibility", "Sports",
+    "Crisis", "Fail", "Lead", "Care", "Cry", "Alone", "Quarrel", "Tired", "Hard",
+    "Sorrow", "Selfish", "Rules", "Wound", "Decision", "Future", "Peace", "Worry", "Respect"];
+
+  var topics = ["Cyber security", "Role of NCC", "Climate change", "Women in armed forces",
+    "Make in India", "Youth unemployment", "Discipline", "Space programme",
+    "Social media", "Disaster management", "Digital India", "Water scarcity"];
+
+  // Pictures: put pic1.jpg, pic2.jpg ... in a folder named "images"
+
+  // ---------- 2. TIMINGS in seconds (edit freely) ----------
+
+  var viewTime = 30;      // PPDT / TAT picture viewing
+  var writeTime = 240;    // PPDT / TAT writing (4 minutes)
+  var wordTime = 15;      // WAT, per word
+  var prepTime = 180;     // Lecturette preparation
+  var speakTime = 180;    // Lecturette speaking
+
+  // ---------- 3. VARIABLES the program remembers ----------
+
+  var steps = [];         // list of steps for the chosen test
+  var current = 0;        // which step we are on
+  var secondsLeft = 0;    // countdown
+  var timer = null;       // the running clock
+  var paused = false;
+
+  // ---------- 4. BUILD THE STEPS ----------
+
+  // Each step = a title, something to show, and how many seconds.
+  function addStep(title, content, seconds) {
+    steps.push({ title: title, content: content, seconds: seconds });
+  }
+
+  function pictureHtml(number) {
+    return '<img src="images/pic' + number + '.jpg" alt="Add images/pic' + number + '.jpg">';
+  }
+
+  function startTest(name) {
+    steps = [];
+    current = 0;
+
+    if (name == "ppdt") {
+      var n = Math.floor(Math.random() * 11) + 1;   // random picture 1-11
+      addStep("PPDT: Look at the picture", pictureHtml(n), viewTime);
+      addStep("PPDT: Write your story", "Write now", writeTime);
+    }
+
+    if (name == "tat") {
+      for (var n = 1; n <= 11; n++) {
+        addStep("TAT " + n + "/12: Look", pictureHtml(n), viewTime);
+        addStep("TAT " + n + "/12: Write", "Write story " + n, writeTime);
+      }
+      addStep("TAT 12/12: Blank slide", "Imagine your own scene", viewTime);
+      addStep("TAT 12/12: Write", "Write story 12", writeTime);
+    }
+
+    if (name == "wat") {
+      var shuffled = words.slice().sort(function () { return Math.random() - 0.5; });
+      for (var i = 0; i < shuffled.length; i++) {
+        addStep("WAT: Word " + (i + 1) + "/" + shuffled.length, shuffled[i], wordTime);
+      }
+    }
+
+    if (name == "lecturette") {
+      var four = topics.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 4);
+      addStep("Lecturette: Choose one topic and prepare", four.join("<br>"), prepTime);
+      addStep("Lecturette: Speak now", "Start your talk", speakTime);
+    }
+
+    showStep();
+  }
+
+  // ---------- 5. SHOW A STEP AND RUN THE CLOCK ----------
+
+  function showStep() {
+    clearInterval(timer);
+
+    if (current >= steps.length) {          // no more steps
+      document.getElementById("title").innerHTML = "Time up!";
+      document.getElementById("content").innerHTML = "Test complete";
+      document.getElementById("timer").innerHTML = "";
+      return;
+    }
+
+    var step = steps[current];
+    document.getElementById("title").innerHTML = step.title;
+    document.getElementById("content").innerHTML = step.content;
+    secondsLeft = step.seconds;
+    paused = false;
+    showTime();
+    timer = setInterval(tick, 1000);        // run tick() every 1 second
+  }
+
+  function tick() {
+    secondsLeft = secondsLeft - 1;
+    showTime();
+    if (secondsLeft <= 0) {
+      beep();
+      nextStep();
+    }
+  }
+
+  function showTime() {
+    var minutes = Math.floor(secondsLeft / 60);
+    var seconds = secondsLeft % 60;
+    if (seconds < 10) { seconds = "0" + seconds; }
+    document.getElementById("timer").innerHTML = minutes + ":" + seconds;
+  }
+
+  function nextStep() {
+    current = current + 1;
+    showStep();
+  }
+
+  function pauseOrResume() {
+    if (current >= steps.length) { return; }
+    if (paused) {
+      timer = setInterval(tick, 1000);
+      paused = false;
+    } else {
+      clearInterval(timer);
+      paused = true;
+    }
+  }
+
+  // ---------- 6. SOUND ----------
+
+  function beep() {
+    var audio = new (window.AudioContext || window.webkitAudioContext)();
+    var sound = audio.createOscillator();
+    sound.connect(audio.destination);
+    sound.start();
+    sound.stop(audio.currentTime + 0.3);
+  }
 </script>
 </body>
 </html>
